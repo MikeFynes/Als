@@ -41,15 +41,18 @@ public class DriveServiceImpl implements DriveService {
 
         // Print the names and IDs for up to 10 files.
         FileList result = service.files().list()
+                .setFields("files(id, name, ownedByMe, shared, permissions)")
                 .execute();
 
         System.out.print("Found some!");
+        if(result.getFiles().size() < 1){
+            throw new RuntimeException("No results!");
+        }
         List<File> filteredList = result.getFiles().stream().filter(f -> {
-
             boolean owned = f.getOwnedByMe() != null ? f.getOwnedByMe() : false;
-            boolean shared = f.getShared() != null ? f.getShared() : false;
-
+            boolean shared = f.getPermissionIds() != null ?  f.getPermissionIds().size() > 1 : false;
             return owned && shared;
+
         }).collect(Collectors.toList());
 
         if (filteredList == null || filteredList.isEmpty()) {
