@@ -2,6 +2,8 @@ package com.fynes.als.spi;
 
 import com.fynes.als.Constants;
 import com.fynes.als.model.Echo;
+import com.fynes.als.model.FileCollection;
+import com.fynes.als.model.FileDTO;
 import com.fynes.als.service.DriveService;
 import com.fynes.als.service.DriveServiceImpl;
 import com.google.api.server.spi.auth.common.User;
@@ -11,8 +13,8 @@ import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.config.Named;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.api.services.drive.model.File;
+import com.google.auth.oauth2.AccessToken;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -29,12 +31,18 @@ public class DriveApi {
     }
 
     @ApiMethod(name="driveFiles", path="files", httpMethod = HttpMethod.GET)
-    public List<File> driveFiles(User user) throws IOException, GeneralSecurityException, UnauthorizedException {
-        if (user == null) {
-            throw new UnauthorizedException("Invalid credentials");
-        }
+    public List<File> driveFiles() throws IOException, GeneralSecurityException, UnauthorizedException {
 
         DriveService driveService = new DriveServiceImpl();
             return driveService.findAllOwnedAndShared();
+    }
+
+    @ApiMethod(name="saveDriveFiles", path="save", httpMethod = HttpMethod.PUT)
+    public List<FileDTO> saveFiles(FileCollection files){
+
+        System.out.println("Files saved!");
+
+
+        return null;
     }
 }
