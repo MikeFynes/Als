@@ -58,13 +58,4 @@ public class FileDTO implements Serializable {
 
         return Objects.hash(name, id, url);
     }
-
-    public FileEntity toEntity(){
-        FileEntity fileEntity = new FileEntity();
-        fileEntity.setName(this.name);
-        fileEntity.setDriveId(this.id);
-        fileEntity.setUrl(this.url);
-
-        return fileEntity;
-    }
 }

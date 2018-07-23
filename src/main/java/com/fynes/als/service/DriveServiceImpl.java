@@ -3,37 +3,58 @@ package com.fynes.als.service;
 
 import com.fynes.als.model.FileCollection;
 import com.fynes.als.model.FileDTO;
-import com.fynes.als.model.FileEntity;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
+import com.google.common.collect.ImmutableList;
 
-import java.util.stream.Stream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class DriveServiceImpl implements DriveService {
 
-    private SessionFactory sessionFactory;
+    private Connection connection;
 
-    public DriveServiceImpl() {
-        this.sessionFactory = new Configuration().configure("hibernate-config.xml").buildSessionFactory();
+    public DriveServiceImpl(Connection connection) {
+        this.connection = connection;
     }
 
     @Override
     public void saveFiles(FileCollection fileCollection) {
-        Session session = sessionFactory.getCurrentSession();
-        session.getTransaction().begin();
+        fileCollection.getFiles().forEach(file -> {
+            try {
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO file_entity VALUES (?, ?, ?)");
+                preparedStatement.setString(1, file.getName());
+                preparedStatement.setString(2, file.getId());
+                preparedStatement.setString(3, file.getUrl());
 
-        Stream<FileEntity> fileEntityStream = fileCollection.getFiles().stream().map(FileDTO::toEntity);
-
-
-
-        session.flush();
-        session.close();
-
+                if(!preparedStatement.execute()){
+                    throw new RuntimeException("insertion failed!");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
     public FileCollection getFiles() {
-        return null;
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT t FROM file_entity as t");
+            ResultSet resultSet = preparedStatement.executeQuery();
+            ImmutableList.Builder<FileDTO> builder = new ImmutableList.Builder<>();
+            while(resultSet.next()){
+                FileDTO fileDTO = new FileDTO(
+                        resultSet.getString("name"),
+                        resultSet.getString("drive_id"),
+                        resultSet.getString("url")
+                );
+
+                builder.add(fileDTO);
+            }
+
+            return new FileCollection(builder.build());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
