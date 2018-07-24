@@ -8,6 +8,7 @@ import com.fynes.als.service.DriveServiceImpl;
 import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -26,6 +27,7 @@ public class DriverServiceTest {
     }
 
 
+    @Ignore
     @Test
     public void saveFileEntityTest(){
         FileDTO fileDTO1 = new FileDTO("file_1", "id_1", "url_1");
