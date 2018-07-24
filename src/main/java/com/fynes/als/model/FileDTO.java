@@ -1,22 +1,21 @@
 package com.fynes.als.model;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class FileDTO implements Serializable {
 
-    @NotNull
     private String name;
-    @NotNull
     private String id;
-    @NotNull
-    private String url;
+    private String webViewLink;
 
-    public FileDTO(String name, String id, String url) {
+    public FileDTO() {
+    }
+
+    public FileDTO(String name, String id, String webViewLink) {
         this.name = name;
         this.id = id;
-        this.url = url;
+        this.webViewLink = webViewLink;
     }
 
     public String getName() {
@@ -35,12 +34,12 @@ public class FileDTO implements Serializable {
         this.id = id;
     }
 
-    public String getUrl() {
-        return url;
+    public String getWebViewLink() {
+        return webViewLink;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setWebViewLink(String webViewLink) {
+        this.webViewLink = webViewLink;
     }
 
     @Override
@@ -50,12 +49,12 @@ public class FileDTO implements Serializable {
         FileDTO fileDTO = (FileDTO) o;
         return Objects.equals(name, fileDTO.name) &&
                 Objects.equals(id, fileDTO.id) &&
-                Objects.equals(url, fileDTO.url);
+                Objects.equals(webViewLink, fileDTO.webViewLink);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(name, id, url);
+        return Objects.hash(name, id, webViewLink);
     }
 }

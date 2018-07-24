@@ -22,14 +22,12 @@ public class DriveServiceImpl implements DriveService {
     public void saveFiles(FileCollection fileCollection) {
         fileCollection.getFiles().forEach(file -> {
             try {
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO file_entity VALUES (?, ?, ?)");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO file_entity(name, drive_id, url) VALUES (?, ?, ?)");
                 preparedStatement.setString(1, file.getName());
                 preparedStatement.setString(2, file.getId());
-                preparedStatement.setString(3, file.getUrl());
+                preparedStatement.setString(3, file.getWebViewLink());
 
-                if(!preparedStatement.execute()){
-                    throw new RuntimeException("insertion failed!");
-                }
+                preparedStatement.execute();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -39,7 +37,7 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public FileCollection getFiles() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("SELECT t FROM file_entity as t");
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM file_entity");
             ResultSet resultSet = preparedStatement.executeQuery();
             ImmutableList.Builder<FileDTO> builder = new ImmutableList.Builder<>();
             while(resultSet.next()){

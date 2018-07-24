@@ -6,40 +6,9 @@
  *
  */
 
-var CLIENT_ID = "614829792503-d52aoilleoc8hjs38jsvac9vvedi0ig3.apps.googleusercontent.com";
-var SCOPES = 'https://www.googleapis.com/auth/drive';
-
 var rootpath = "//" + window.location.host + "/_ah/api";
 
 var files = [];
-
-function init() {
-    gapi.client.load('driveTesting', 'v1', loadCallback, rootpath);
-}
-
-function loadCallback() {
-    enableButtons();
-}
-
-function enableButtons() {
-    var btn = document.getElementById("save_to_db");
-    btn.onclick = function () { saveFiles() };
-
-    btn.value = "Fetch";
-}
-
-function saveFiles() {
-
-    var request = gapi.client.driveTesting.saveDriveFiles();
-
-    request.execute(fetchFilesCallback);
-}
-
-function fetchFilesCallback(response) {
-    // If response has failed it will be a boolean with value : false
-
-    var woop = "it worked"
-}
 
 // Client ID and API key from the Developer Console
 var CLIENT_ID = '614829792503-d52aoilleoc8hjs38jsvac9vvedi0ig3.apps.googleusercontent.com';
@@ -54,6 +23,68 @@ var SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
 
 var authorizeButton = document.getElementById('authorize_button');
 var signoutButton = document.getElementById('signout_button');
+
+function init() {
+    gapi.client.load('driveTesting', 'v1', loadCallback, rootpath);
+}
+
+function loadCallback() {
+    enableButtons();
+}
+
+function enableButtons() {
+    var save_button = document.getElementById("save_to_db");
+    save_button.onclick = function () { saveFiles() };
+
+    save_button.value = "Save";
+
+    var fetch_button = document.getElementById("fetch_from_db");
+    fetch_button.onclick = function () { fetchFiles() };
+
+    fetch_button.value = "Fetch";
+}
+
+function saveFiles() {
+
+    var fileCollection = {files : self.files};
+
+    var request = gapi.client.driveTesting.saveDriveFiles(fileCollection);
+
+    request.execute(saveFilesCallback);
+}
+
+function saveFilesCallback(response){
+    if(response){
+        appendPre("Successfully saved", "save_result_content");
+    }
+}
+
+function fetchFilesCallback(response) {
+    // If response has failed it will be a boolean with value : false
+    if(response){
+        var files = response.files;
+        var preContent = 'db_content';
+        clearPre(preContent);
+
+        if (files && files.length > 0) {
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                appendPre(file.name + ' (' + file.id + ')', preContent);
+
+                self.files.push(file);
+            }
+        } else {
+            appendPre('No files found.', preContent);
+        }
+    }
+}
+
+function fetchFiles() {
+    var request = gapi.client.driveTesting.driveFiles()
+    request.execute(fetchFilesCallback);
+}
+
+
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -88,6 +119,13 @@ function initClient() {
  *  appropriately. After a sign-in, the API is called.
  */
 function updateSigninStatus(isSignedIn) {
+
+    if(authorizeButton == null){
+        authorizeButton = document.getElementById('authorize_button');
+    }
+    if(signoutButton == null){
+        signoutButton = document.getElementById('signout_button');
+    }
     if (isSignedIn) {
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'block';
@@ -117,11 +155,24 @@ function handleSignoutClick(event) {
  * as its text node. Used to display the results of the API call.
  *
  * @param {string} message Text to be placed in pre element.
+ * @param {string} elementName id of element to be used.
  */
-function appendPre(message) {
-    var pre = document.getElementById('content');
+function appendPre(message, elementName) {
+    var pre = document.getElementById(elementName);
     var textContent = document.createTextNode(message + '\n');
     pre.appendChild(textContent);
+}
+
+/**
+ * Clears a pre element to allow new data to be displayed
+ *
+ * @param {string} elementName id of element to be used.
+ */
+function clearPre(elementName) {
+    var pre = document.getElementById(elementName);
+    while (pre.lastChild) {
+        pre.removeChild(pre.lastChild);
+    }
 }
 
 /**
@@ -130,19 +181,23 @@ function appendPre(message) {
 function listFiles() {
     gapi.client.drive.files.list({
         'pageSize': 10,
-        'fields': "nextPageToken, files(id, name, webViewLink)"
+        'fields': 'nextPageToken, files(id, name, webViewLink, ownedByMe, shared)'
     }).then(function(response) {
-        appendPre('Files:');
+        var preContent = 'content';
+        clearPre(preContent);
+        appendPre('Files owned by me and shared:', preContent);
         var files = response.result.files;
         if (files && files.length > 0) {
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
-                appendPre(file.name + ' (' + file.id + ')');
 
-                files.push(file);
+                if(file.ownedByMe && file.shared){
+                    appendPre(file.name + ' (' + file.id + ')', preContent);
+                    self.files.push(file);
+                }
             }
         } else {
-            appendPre('No files found.');
+            appendPre('No files found.', preContent);
         }
     });
 }

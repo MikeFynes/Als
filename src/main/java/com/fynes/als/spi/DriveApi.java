@@ -30,10 +30,9 @@ public class DriveApi {
     }
 
     @ApiMethod(name="saveDriveFiles", path="save", httpMethod = HttpMethod.PUT)
-    public FileCollection saveFiles(FileCollection files){
+    public void saveFiles(FileCollection files){
         DriveService driveService = new DriveServiceImpl(getConnection());
         driveService.saveFiles(files);
-        return driveService.getFiles();
     }
 
 
