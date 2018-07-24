@@ -69,7 +69,7 @@ function fetchFilesCallback(response) {
         if (files && files.length > 0) {
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
-                appendPre(file.name + ' (' + file.id + ')', preContent);
+                appendPre('Name: ' + file.name + ' ID: ' + file.id  + ' URL: ' + file.webViewLink, preContent);
 
                 self.files.push(file);
             }
@@ -192,7 +192,7 @@ function listFiles() {
                 var file = files[i];
 
                 if(file.ownedByMe && file.shared){
-                    appendPre(file.name + ' (' + file.id + ')', preContent);
+                    appendPre('Name: ' + file.name + ' ID: ' + file.id  + ' URL: ' + file.webViewLink, preContent);
                     self.files.push(file);
                 }
             }
